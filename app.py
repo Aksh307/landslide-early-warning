@@ -141,6 +141,7 @@ def main():
 
     with col_panel:
         st.subheader("Location check")
+
         if check:
             pt = nearest_grid_point(df, lat_in, lon_in)
             susceptibility = float(pt["susceptibility"])
@@ -154,18 +155,27 @@ def main():
                 rain_today, rain_tomorrow = 0.0, None
 
             alert = susceptibility >= HIGH_SUSCEPTIBILITY and rain_today >= RAIN_ALERT_THRESHOLD_MM
+            st.session_state["result"] = {
+                "lat": lat_in, "lon": lon_in,
+                "susceptibility": susceptibility,
+                "rain_today": rain_today,
+                "rain_tomorrow": rain_tomorrow,
+                "alert": alert,
+            }
 
-            st.metric("Susceptibility (nearest grid cell)", f"{susceptibility:.0%}")
-            st.metric("Rainfall (last 24h)", f"{rain_today:.0f} mm")
-            if rain_tomorrow is not None:
-                st.metric("Forecast (next 24h)", f"{rain_tomorrow:.0f} mm")
+        result = st.session_state.get("result")
+        if result:
+            st.metric("Susceptibility (nearest grid cell)", f"{result['susceptibility']:.0%}")
+            st.metric("Rainfall (last 24h)", f"{result['rain_today']:.0f} mm")
+            if result["rain_tomorrow"] is not None:
+                st.metric("Forecast (next 24h)", f"{result['rain_tomorrow']:.0f} mm")
 
-            if alert:
+            if result["alert"]:
                 st.error("⚠️ HIGH RISK ALERT")
             else:
                 st.success("No alert")
 
-            en, hi = advisory_text(susceptibility, rain_today, alert)
+            en, hi = advisory_text(result["susceptibility"], result["rain_today"], result["alert"])
             st.markdown("**Advisory (English)**")
             st.write(en)
             st.markdown("**सलाह (हिंदी)**")
