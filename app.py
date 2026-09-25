@@ -119,7 +119,7 @@ def main():
     col_map, col_panel = st.columns([2.2, 1])
 
     with col_map:
-        m = folium.Map(location=center, zoom_start=zoom, tiles="CartoDB positron")
+       m = folium.Map(location=center, zoom_start=zoom, tiles="OpenStreetMap")
         # keep the map light: sample down if too many points
         plot_df = view_df.sample(min(len(view_df), 6000), random_state=0)
         for _, r in plot_df.iterrows():
